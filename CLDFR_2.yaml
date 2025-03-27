@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation S3 template
+# Resources section
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: cloudformationbucketmarch27avi
+  AccessLogBucket:
+    Type: String
+    Default: s3jan27bucket
+  KmsKeyArn:
+    Type: String
+    Default: arn:aws:kms:us-east-2:867344454570:key/ae66c208-7481-48b4-9fe8-406331b8a7f9
+
+Resources:
+  MainBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      
+      # Setup encryption - KMS Key
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref KmsKeyArn
+
+      # Enable versioning
+      VersioningConfiguration:
+        Status: Enabled
+
+      # Block public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+      # Setup Log bucket
+      LoggingConfiguration:
+        DestinationBucketName: !Ref AccessLogBucket
+        LogFilePrefix: "logs/"
+
+Outputs:
+  MainBucketName:
+    Description: Name of the main bucket
+    Value: !Ref MainBucket
